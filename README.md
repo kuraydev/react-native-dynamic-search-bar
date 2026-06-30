@@ -253,9 +253,13 @@ statically and never required on web** (`Platform.OS === "web"` short-circuits
 before the lazy `require`), so it can't break your web bundle whether or not
 the package is installed.
 
-If you toggle `spinnerVisibility` on web without `react-native-spinkit`, the
+If you toggle `spinnerVisibility` without `react-native-spinkit` installed, the
 search bar gracefully falls back to React Native's cross-platform
-[`ActivityIndicator`](https://reactnative.dev/docs/activityindicator). For a
+[`ActivityIndicator`](https://reactnative.dev/docs/activityindicator). This
+fallback applies whenever `react-native-spinkit` is absent — web, Expo, **or
+native (iOS/Android) without the optional package** — so a requested spinner
+always renders something instead of an empty slot. When `react-native-spinkit`
+is installed, the native `<SpinKit/>` is used and its output is unchanged. For a
 themed spinner that matches your native one, pass a JS-only
 [`spinnerComponent`](#loading-spinner) (e.g.
 [`react-native-animated-spinkit`](https://github.com/zeptodev/react-native-animated-spinkit)),

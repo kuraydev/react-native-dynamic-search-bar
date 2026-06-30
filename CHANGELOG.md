@@ -23,8 +23,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   react-native-web with `react-native-spinkit` not installed. The native
   spinner is never imported statically or required on web (a `Platform.OS ===
   "web"` guard short-circuits before the lazy `require`), and the spinner slot
-  falls back to React Native's cross-platform `ActivityIndicator` when spinkit
-  is absent (closes #98, #102).
+  falls back to React Native's cross-platform `ActivityIndicator` whenever
+  `react-native-spinkit` is absent — web, Expo, or native without the optional
+  package (closes #98, #102). On native this is an intentional behavior change:
+  a requested spinner (`spinnerVisibility`) previously rendered nothing when the
+  optional module was missing and now shows the `ActivityIndicator` fallback.
+  Installing `react-native-spinkit` keeps the native `<SpinKit/>` render
+  byte-for-byte identical.
 - Accessibility roles/labels on the container, search icon (`Search`), clear
   icon (`Clear search`), and a `search` role on the input.
 - Real unit test suite (Jest + React Native Testing Library).
