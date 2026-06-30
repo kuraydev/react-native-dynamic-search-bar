@@ -45,7 +45,7 @@ loading spinner. Pure JavaScript — works with the **New Architecture** and wit
 - [Imperative ref API](#imperative-ref-api)
 - [Loading spinner](#loading-spinner)
 - [Props](#props)
-- [New Architecture & Expo](#new-architecture--expo)
+- [New Architecture, Expo & react-native-web](#new-architecture-expo--react-native-web)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [Author](#author)
@@ -234,7 +234,7 @@ and [`TouchableWithoutFeedbackProps`](https://reactnative.dev/docs/touchablewith
 | `spinnerColor`          | `string`              | theme-based         | Spinner color                                                     |
 | `spinnerComponent`      | `ReactNode`           | —                   | Render a custom spinner instead of the built-in one              |
 
-## New Architecture & Expo
+## New Architecture, Expo & react-native-web
 
 This package contains **no native code** of its own — it's a pure-JavaScript
 component, so it works with the **New Architecture (Fabric/TurboModules)** and
@@ -244,6 +244,22 @@ The only native dependency is the **optional** built-in spinner
 (`react-native-spinkit`). If you target Expo Go or want to avoid native modules
 entirely, skip installing it and pass your own JS spinner via
 [`spinnerComponent`](#loading-spinner).
+
+### react-native-web
+
+The search bar runs on **react-native-web** with no extra setup. Because
+`react-native-spinkit` is a native-only module, it is **never imported
+statically and never required on web** (`Platform.OS === "web"` short-circuits
+before the lazy `require`), so it can't break your web bundle whether or not
+the package is installed.
+
+If you toggle `spinnerVisibility` on web without `react-native-spinkit`, the
+search bar gracefully falls back to React Native's cross-platform
+[`ActivityIndicator`](https://reactnative.dev/docs/activityindicator). For a
+themed spinner that matches your native one, pass a JS-only
+[`spinnerComponent`](#loading-spinner) (e.g.
+[`react-native-animated-spinkit`](https://github.com/zeptodev/react-native-animated-spinkit)),
+which renders identically on web, native, and Expo.
 
 ## Contributing
 

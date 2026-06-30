@@ -19,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New `spinnerComponent` prop to supply a custom (JS-only) spinner — ideal for
   Expo / New Architecture apps that avoid native modules (e.g.
   `react-native-animated-spinkit`).
+- **react-native-web support.** The component now bundles and renders on
+  react-native-web with `react-native-spinkit` not installed. The native
+  spinner is never imported statically or required on web (a `Platform.OS ===
+  "web"` guard short-circuits before the lazy `require`), and the spinner slot
+  falls back to React Native's cross-platform `ActivityIndicator` when spinkit
+  is absent (closes #98, #102).
 - Accessibility roles/labels on the container, search icon (`Search`), clear
   icon (`Clear search`), and a `search` role on the input.
 - Real unit test suite (Jest + React Native Testing Library).
@@ -32,9 +38,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - **BREAKING:** `react-native-spinkit` is now an **optional** peer dependency.
-  It is required lazily, so apps that never use the built-in spinner (or run on
-  Expo Go) no longer fail to build (closes #98, #102). Install it explicitly
-  only if you use the built-in spinner with no `spinnerComponent`.
+  It is required lazily (and skipped entirely on web), so apps that never use
+  the built-in spinner, run on Expo Go, or target react-native-web no longer
+  fail to build (closes #98, #102). Install it explicitly only if you use the
+  built-in spinner with no `spinnerComponent`.
 - **BREAKING:** Build output moved from `build/dist/SearchBar.js` to
   `react-native-builder-bob` output under `lib/`. The default import
   (`import SearchBar from "react-native-dynamic-search-bar"`) is unchanged.

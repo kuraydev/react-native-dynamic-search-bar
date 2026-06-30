@@ -2,12 +2,14 @@ import * as React from "react";
 import {
   View,
   Image,
+  Platform,
   TextInput,
   ViewStyle,
   TextStyle,
   ImageStyle,
   StyleProp,
   Insets,
+  ActivityIndicator,
   AccessibilityRole,
   ImageSourcePropType,
   TextInputProps,
@@ -45,27 +47,41 @@ const whiteSearchIcon = require("./local-assets/search-icon-white.png");
 const defaultClearIcon = require("./local-assets/clear-icon.png");
 const whiteClearIcon = require("./local-assets/clear-icon-white.png");
 
-/**
- * `react-native-spinkit` is a native module and is declared as an *optional*
- * peer dependency. Require it lazily so that consumers who never use the
- * built-in spinner (or run on Expo Go, where the native module is unavailable)
- * are not forced to install it and do not hit a Metro resolution failure.
- */
-function resolveSpinKit(): React.ComponentType<{
+type SpinKitComponent = React.ComponentType<{
   size?: number;
   type?: string;
   color?: string;
   isVisible?: boolean;
-}> | null {
-  try {
-    const mod = require("react-native-spinkit");
-    return (mod && (mod.default || mod)) ?? null;
-  } catch {
+}>;
+
+let cachedSpinKit: SpinKitComponent | null | undefined;
+
+/**
+ * `react-native-spinkit` is a native module and is declared as an *optional*
+ * peer dependency. We never import it at module top: it is required lazily, on
+ * demand, and only the first time the built-in spinner is actually rendered.
+ *
+ * On `react-native-web` / Expo web the native module simply does not exist, so
+ * we short-circuit before the `require` ever runs — this keeps the web bundle
+ * free of any spinkit reference and avoids a Metro/webpack resolution crash.
+ * The `Platform.OS === "web"` guard is web-only, so the native code path
+ * (require + cache) is byte-for-byte unchanged.
+ */
+function resolveSpinKit(): SpinKitComponent | null {
+  if (Platform.OS === "web") {
     return null;
   }
+  if (cachedSpinKit !== undefined) {
+    return cachedSpinKit;
+  }
+  try {
+    const mod = require("react-native-spinkit");
+    cachedSpinKit = (mod && (mod.default || mod)) ?? null;
+  } catch {
+    cachedSpinKit = null;
+  }
+  return cachedSpinKit ?? null;
 }
-
-const SpinKit = resolveSpinKit();
 
 /**
  * The spinner type values accepted by `react-native-spinkit`.
@@ -200,16 +216,31 @@ const SearchBar = React.forwardRef<SearchBarHandle, ISearchBarProps>(
       if (spinnerComponent) {
         return <View style={styles.spinnerContainer}>{spinnerComponent}</View>;
       }
-      if (!SpinKit) {
-        return null;
+      const SpinKit = resolveSpinKit();
+      if (SpinKit) {
+        return (
+          <View style={styles.spinnerContainer}>
+            <SpinKit
+              size={spinnerSize}
+              type={spinnerType}
+              color={spinnerColor}
+              isVisible={spinnerVisibility}
+            />
+          </View>
+        );
       }
+      /**
+       * `react-native-spinkit` is unavailable — typically react-native-web /
+       * Expo without the optional native module installed. Fall back to RN's
+       * cross-platform `ActivityIndicator` so the spinner slot still renders
+       * (and the bundle never crashes) instead of showing nothing.
+       */
       return (
         <View style={styles.spinnerContainer}>
-          <SpinKit
-            size={spinnerSize}
-            type={spinnerType}
+          <ActivityIndicator
+            size="small"
             color={spinnerColor}
-            isVisible={spinnerVisibility}
+            animating={spinnerVisibility}
           />
         </View>
       );
